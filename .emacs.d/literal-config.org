@@ -1,0 +1,761 @@
+
+
+* Org babel defaults
+
+* Ctrl and Esc
+  Using the packages setxkbmap and xcape my CAPS lock key serves as a esc on tap and ctrl on key chord
+  
+ setxkbmap -option ctrl:nocaps
+  xcape -e 'Control_L=Escape' -t 175
+
+* Straight boot
+
+#+begin_src emacs-lisp :tangle yes
+
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+	(expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+	(bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+	  (url-retrieve-synchronously
+	  "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+	  'silent 'inhibit-cookies)
+	(goto-char (point-max))
+	(eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+
+  (setq package-enable-at-startup nil)
+
+  (straight-use-package 'use-package)
+
+  (setq straight-use-package-by-default t)
+
+#+end_src 
+* Remove excess heading garbage
+
+#+begin_src emacs-lisp :tangle yes
+
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+
+#+end_src
+* TODO Counsel
+
+Not in use right now
+
+#+begin_src emacs-lisp :tangle no
+  (use-package counsel
+    :straight t
+    :bind (("M-x" . counsel-M-x)
+	   ("C-x b" . counsel-ibuffer)
+	   ("C-x C-f" . counsel-find-file)
+
+	   :map minibuffer-local-map
+	   ("C-r" . 'counsel-minibuffer-history)))
+
+  (use-package ivy
+    :straight t
+    :bind (
+      :map ivy-minibuffer-map
+      ("C-j" . 'ivy-next-line)
+      ("C-k" . 'ivy-previous-line)
+    ))
+
+#+end_src
+
+#+RESULTS:
+: counsel-minibuffer-history
+* Doom
+
+#+begin_src emacs-lisp :tangle yes
+(use-package doom-themes
+  :straight t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+#+end_src 
+* gruber
+
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package gruber-darker-theme
+    :straight t)
+    ;:init (load-theme 'gruber-darker t t)
+
+#+end_src 
+* Prot themes
+
+Prot makes damn good themes
+
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package ef-themes
+    :straight t
+    :init (load-theme 'ef-dark t nil))
+
+#+end_src 
+
+* Window management
+** EXWM
+
+#+begin_src emacs-lisp :tangle yes
+  (defun mk/exwm-update-class ()
+     (exwm-workspace-rename-buffer exwm-class-name))
+
+   (use-package exwm
+     :straight t
+   :config
+      (setq exwm-workspace-number 5)
+
+   (require 'exwm-systemtray)
+   
+(exwm-systemtray-enable)
+
+   ;; When window "class" updates, use it to set the buffer name
+   ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
+
+   ;; These keys should always pass through to Emacs
+   ;; Prefix keys get sent to emacs and not the given window
+   (setq exwm-input-prefix-keys
+     '(?\C-x
+       ?\C-u
+       ?\C-h
+       ?\M-x
+       ?\M-`
+       ?\M-&
+       ?\M-:
+       ?\C-\M-j  ;; Buffer list
+       ?\C-\ ))  ;; Ctrl+Space
+
+   ;; Ctrl+Q will enable the next key to be sent directly
+   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+
+   ;; this is a way to declare truly global/always working keybindings
+     ;; this is a nifty way to go back from char mode to line mode without using the mouse
+     (exwm-input-set-key (kbd "s-r") #'exwm-reset)
+     (exwm-input-set-key (kbd "s-k") #'exwm-workspace-delete)
+     (exwm-input-set-key (kbd "s-s") #'exwm-workspace-swap)
+
+   ;; Set up global key bindings.  These always work, no matter the input state!
+   ;; Keep in mind that changing this list after EXWM initializes has no effect.
+   (setq exwm-input-global-keys
+	 `(
+	   ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+	   ([?\s-r] . exwm-reset)
+
+	   ;; Move between windows
+	   ([?\s-h] . windmove-left)
+	   ([?\s-l] . windmove-right)
+	   ([?\s-k] . windmove-up)
+	   ([?\s-j] . windmove-down)
+
+	   ;; Launch applications via shell command
+	   ([?\s-&] . (lambda (command)
+			(interactive (list (read-shell-command "$ ")))
+			(start-process-shell-command command nil command)))
+
+	   ;; Switch workspace
+	   ([?\s-w] . exwm-workspace-switch)
+           ([?\s-k] . exwm-input-release-keyboard)
+
+	   ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+	   ,@(mapcar (lambda (i)
+		       `(,(kbd (format "s-%d" i)) .
+			 (lambda ()
+			   (interactive)
+			   (exwm-workspace-switch-create ,i))))
+		     (number-sequence 0 9))))
+
+
+
+      (exwm-enable t))
+
+#+end_src
+
+* Evil mode and general keybindig soulutions
+evil mode
+
+=C-z= means go to emacs mode
+#+begin_src emacs-lisp :tangle yes
+
+	(use-package evil
+	  :straight t
+	  :config
+      (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+  )
+
+#+end_src
+
+
+
+** General.el keys
+#+begin_src emacs-lisp :tangle yes
+
+(use-package general
+  :config
+  (general-evil-setup t)
+
+  (general-create-definer mk/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC"))
+
+(mk/leader-keys
+  "t"  '(:ignore t :which-key "toggles")
+  "tt" '(load-theme :which-key "choose theme"))
+
+    (general-define-key "C-M-j" 'switch-to-buffer)
+
+    ;; could get annoying with vim escape
+    (global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
+
+#+end_src
+* Which key
+
+#+begin_src emacs-lisp :tangle yes
+(use-package which-key
+  :straight t
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+#+end_src
+
+* Hydra
+
+For quick repetitive actions
+
+#+begin_src emacs-lisp :tangle yes
+       (use-package hydra
+       :straight t)
+
+   (defhydra hydra-text-scale (:timeout 4)
+     "scale text"
+     ("j" text-scale-increase "in")
+     ("k" text-scale-decrease "out")
+     ("f" nil "finished" :exit t))
+
+
+   (defhydra hydra-shape-screen (:timeout 4)
+     "scale text"
+     ("h" enlarge-window-horizontally "in")
+     ("l" shrink-window-horizontally "out")
+     ("k" enlarge-window "up")
+     ("j" (enlarge-window -1) "down")
+     ("=" balance-windows "equalize")
+     ("f" nil "finished" :exit t))
+
+  ;; enlarge-window-horizontally 
+
+   (mk/leader-keys
+   "ts" '(hydra-text-scale/body :which-key "scale-text")
+   "t}" '(hydra-shape-screen/body :which-key "size-screen"))
+
+#+end_src
+* Terminals
+
+#+begin_src emacs-lisp :tangle yes
+(use-package vterm
+    :straight t)
+#+end_src
+* Doom modeline
+
+great minimal modeline it depends on all-the-icons
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package doom-modeline
+	:straight t
+	:init (setq doom-modeline-height 20)
+      (setq doom-modeline-hud nil)
+    (setq doom-modeline-major-mode-color-icon t)
+  (setq doom-modeline-minor-modes nil)
+
+       :hook (after-init . doom-modeline-mode))
+#+end_src
+
+#+begin_src emacs-lisp :tangle yes
+      (use-package all-the-icons
+	:straight t
+	:if (display-graphic-p))
+
+      (use-package all-the-icons-dired
+        :straight t
+        :config
+        (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+#+end_src
+* Numbered Lines
+
+
+#+begin_src emacs-lisp :tangle no
+
+  (add-hook 'org-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (display-line-numbers-mode t)
+  (setq display-line-numbers 'relative)
+
+#+end_src
+* Vertico
+
+Lightweight complestion framework vert slim and fast
+
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package vertico
+    :straight t
+  :bind (:map vertico-map
+	 ("C-j" . vertico-next)
+	 ("C-k" . vertico-previous)
+	 ("C-f" . vertico-exit)
+	 :map minibuffer-local-map
+	 ("M-h" . backward-kill-word))
+  :custom
+  (vertico-cycle t)
+    :init
+  (vertico-mode))
+
+#+end_src
+** Marginalia
+
+Adds the metadata you see at the side of the completions
+
+#+begin_src emacs-lisp :tangle yes
+(use-package marginalia
+  :after vertico
+  :straight t
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  :init
+  (marginalia-mode))
+#+end_src
+* Magit
+
+
+
+#+begin_src emacs-lisp :tangle yes
+(use-package magit
+  :straight t
+  ; replace current window with magit
+  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  :bind (("C-x g" . magit)))
+#+end_src
+
+* Change yes and no to y and n
+
+
+#+begin_src emacs-lisp :tangle yes
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+end_src
+* Dmenu
+
+Pops up a list of all executable programs installe on my system
+
+#+begin_src emacs-lisp :tangle yes
+(use-package dmenu
+  :ensure t
+  :bind
+    ("s-SPC" . 'dmenu))
+#+end_src
+* Key bindings for programs
+
+#+begin_src emacs-lisp :tangle yes
+    (defun exwm-async-run (name)
+      (interactive)
+      (start-process name nil name))
+
+    (defun mk/launch-epiphany ()
+      (interactive)
+      (exwm-async-run "epiphany"))
+
+    (defun mk/lock-screen ()
+      (interactive)
+      (exwm-async-run "slock"))
+
+    (defun mk/shutdown ()
+      (interactive)
+      (start-process "halt" nil "sudo" "halt"))
+
+  (defun mk/launch-firefox ()
+    (interactive)
+    (async-shell-command "flatpak run org.mozilla.firefox"))
+
+#+end_src
+
+** Key bindings for these processes
+
+#+begin_src emacs-lisp :tangle yes
+
+
+  (global-set-key (kbd "s-f") 'mk/launch-firefox)
+  (global-set-key (kbd "<s-tab>") 'mk/launch-epiphany)
+  (global-set-key (kbd "<XF86Favorites>") 'mk/lock-screen)
+  (global-set-key (kbd "<XF86Tools>") 'mk/shutdown)
+
+#+end_src
+
+* TODO This fixes audio issues with exwm
+
+Modifier
+
+#+begin_src emacs-lisp :tangle yes
+(defconst volumeModifier "4")
+#+end_src
+
+
+
+#+begin_src emacs-lisp :tangle yes
+  (defun audio/mute ()
+    (interactive)
+    (start-process "audio-mute" nil "pulseaudio" "--toggle-mute"))
+
+  (defun audio/raise-volume ()
+    (interactive)
+    (start-process "raise-volume" nil "pulseaudio" "--change-volume" (concat "+" volumeModifier)))
+
+  (defun audio/lower-volume ()
+    (interactive)
+    (start-process "lower-volume" nil "pulseaudio" "--change-volume" (concat "-" volumeModifier)))
+    
+#+end_src
+
+#+RESULTS:
+: audio/lower-volume
+
+** TODO Binds the above
+
+#+begin_src emacs-lisp :tangle yes
+(global-set-key (kbd "<XF86AudioMute>") 'audio/mute)
+(global-set-key (kbd "<XF86AudioRaiseVolume>") 'audio/raise-volume)
+(global-set-key (kbd "<XF86AudioLowerVolume>") 'audio/lower-volume)
+#+end_src
+* TODO Screenshot
+
+#+RESULTS:
+: daedreth/take-screenshot
+* TODO DASHBOARD
+* Spaceline
+
+#+begin_src emacs-lisp :tangle no
+(use-package spaceline
+  :ensure t
+  :config
+  (require 'spaceline-config)
+    (setq spaceline-buffer-encoding-abbrev-p nil)
+    (setq spaceline-line-column-p nil)
+    (setq spaceline-line-p nil)
+    (setq powerline-default-separator (quote arrow))
+    (spaceline-spacemacs-theme))
+#+end_src
+* Org bullets
+
+
+
+#+begin_src emacs-lisp :tangle yes
+(use-package org-bullets
+  :straight t
+  :hook (org-mode . org-bullets-mode)
+  :custom (org-bullets-bullet-list '("♱" "⚉" "⚇" "⚉" "⚇" "⚉" "⚇")))
+#+end_src
+* Modeline
+
+Pretty sure it removes the arrows in thr modeline
+
+#+begin_src emacs-lisp :tangle yes
+(setq powerline-default-separator nil)
+#+end_src
+* Time
+#+begin_src emacs-lisp :tangle yes
+    (setq display-time-24hr-format t)
+    (setq display-time-format "%H:%M - %d %B %Y")
+  (display-time-mode 1)
+#+end_src
+* TODO Battery
+
+Displays no battery right now
+
+
+#+begin_src emacs-lisp :tangle yes
+(use-package fancy-battery
+  :straight t
+  :config
+    (setq fancy-battery-show-percentage t)
+    (setq battery-update-interval 15)
+    (if window-system
+      (fancy-battery-mode)
+      (display-battery-mode)))
+#+end_src
+* TODO System monitor
+
+Broken right now
+
+#+begin_src emacs-lisp :tangle yes
+(use-package symon
+  :straight t
+  :bind
+  ("s-h" . symon-mode))
+
+#+end_src
+* Better scrolling
+
+So the whole screen doesn't move
+#+begin_src emacs-lisp :tangle yes
+(setq scroll-conservatively 100)
+#+end_src
+* TODO I love swiper
+
+I need to configure this with evil mode
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package swiper
+      :straight t
+      :bind (("C-s" . 'swiper)
+      :map ivy-minibuffer-map
+	("C-j" . 'ivy-next-line)
+	("C-k" . 'ivy-previous-line)
+      )
+    )
+#+end_src
+* TODO Buffer management
+
+Need to change some keybindigs for ibuffer
+
+#+begin_src emacs-lisp :tangle yes
+(global-set-key (kbd "C-x b") 'ibuffer)
+#+end_src
+* TODO Line number mode
+
+add more hooks for relative lines
+
+#+begin_src emacs-lisp :tangle yes 
+(use-package linum-relative
+  :straight t
+  :config
+    (setq linum-relative-current-symbol "")
+    (add-hook 'prog-mode-hook 'linum-relative-mode))
+
+#+end_src
+* TODO Avy
+* Reload without restarting
+#+begin_src emacs-lisp :tangle yes
+(defun config-reload ()
+  "Reloads ~/.emacs.d/config.org at runtime"
+  (interactive)
+  (org-babel-load-file (expand-file-name "~/.emacs.d/literal-config.org")))
+(global-set-key (kbd "C-c r") 'config-reload)
+#+end_src
+* Electric
+
+Good for parenthesis
+
+#+begin_src emacs-lisp :tangle yes
+  (setq electric-pair-pairs '(
+			     (?\{ . ?\})
+			     (?\( . ?\))
+			     (?\[ . ?\])
+			     (?\" . ?\")
+			     ))
+(electric-pair-mode t)
+#+end_src
+* Beacon
+
+#+begin_src emacs-lisp :tangle yes
+(use-package beacon
+  :straight t
+  :config
+    (beacon-mode 1))
+#+end_src
+* Sudo
+#+begin_src emacs-lisp :tangle yes
+(use-package sudo-edit
+  :straight t
+  :bind
+    ("s-e" . sudo-edit))
+#+end_src
+* Fonts
+* Babel
+#+begin_src emacs-lisp :tangle yes
+(org-babel-do-load-languages
+  'org-babel-load-languages
+  '((emacs-lisp . t)
+    (python . t)))
+
+(push '("conf-unix" . conf-unix) org-src-lang-modes)
+
+#+end_src
+** Custom babel source blocks
+
+#+begin_src emacs-lisp :tangle yes
+  (require 'org-tempo)
+
+  (add-to-list 'org-structure-template-alist '("n" . "name" ))
+#+end_src
+* Transparency
+
+
+#+begin_src emacs-lisp :tangle yes
+  (set-frame-parameter (selected-frame) 'alpha '(85 . 50))
+   (add-to-list 'default-frame-alist '(alpha . (85 . 50)))
+   (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+   (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+   (defun mk/set-wallpaper ()
+     "Sets a random wallpaper on reload"
+     (interactive)
+     (async-shell-command "compton")
+     (start-process-shell-command
+     "feh" nil "feh --bg-scale /home/malcolm/Downloads/Backgrounds/Tintin/tinton.jpg"))
+#+end_src
+* Favorite themes
+
+ef-spring
+ef-summer
+ef-dark
+* Helpful
+
+#+begin_src emacs-lisp :tangle yes
+
+	(use-package helpful
+	:straight t
+	:config
+
+      (global-set-key (kbd "C-h v") #'helpful-variable)
+      (global-set-key (kbd "C-h k") #'helpful-key)
+    (global-set-key (kbd "C-h f") #'helpful-callable)
+      ;; Lookup the current symbol at point. C-c C-d is a common keybinding
+  ;; for this in lisp modes.
+  (global-set-key (kbd "C-M-d") #'helpful-at-point)
+
+  ;; Look up *F*unctions (excludes macros).
+  ;;
+  ;; By default, C-h F is bound to `Info-goto-emacs-command-node'. Helpful
+  ;; already links to the manual, if a function is referenced there.
+  (global-set-key (kbd "C-h F") #'helpful-function)
+
+  ;; Look up *C*ommands.
+  ;;
+  ;; By default, C-h C is bound to describe `describe-coding-system'. I
+  ;; don't find this very useful, but it's frequently useful to only
+  ;; look at interactive functions.
+  (global-set-key (kbd "C-h C") #'helpful-command))
+  
+#+end_src
+* Multiple v-term
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package multi-vterm
+	  :config
+	  (add-hook 'vterm-mode-hook
+			  (lambda ()
+			  (setq-local evil-insert-state-cursor 'box)
+			  (evil-insert-state)))
+	  (define-key vterm-mode-map [return]                      #'vterm-send-return)
+
+	  (setq vterm-keymap-exceptions nil)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
+	  (define-key vterm-mode-map (kbd "C-M-j") #'switch-to-buffer)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
+	  (evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
+	  (evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+	  (evil-define-key 'normal vterm-mode-map (kbd ",c")       #'multi-vterm)
+	  (evil-define-key 'normal vterm-mode-map (kbd ",n")       #'multi-vterm-next)
+	  (evil-define-key 'normal vterm-mode-map (kbd ",p")       #'multi-vterm-prev)
+	  (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
+	  (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
+          (evil-define-key 'normal vterm-mode-map (kbd "p")        #'vterm-yank)
+	  (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
+#+end_src
+* Fonts
+
+This is font size
+
+#+begin_src emacs-lisp :tangle yes
+(set-face-attribute 'default nil :height 140)
+#+end_src
+* Desktop environment
+
+#+begin_src emacs-lisp :tangle yes
+    (use-package desktop-environment
+      :straight t
+      :after exwm
+      :config (desktop-environment-mode))
+  (setenv "GPG_AGENT_INFO" nil)
+(setq epa-pinentry-mode 'loopback)
+
+
+#+end_src
+
+* Projectile
+
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package projectile
+    :straight t
+    :init
+    (projectile-mode 1)
+    :config
+    (setq projectile-project-search-path '(("~/Development/" . 3) "~/clones/" ))
+    :bind (:map projectile-mode-map
+    ; I don't know what keu vinfing I like I want to test out what key bindings feel best
+      ("s-p" . projectile-command-map)
+      ("C-c p" . projectile-command-map)))
+
+#+end_src
+
+* ORG roam
+
+#+begin_src emacs-lisp :tangle no
+(use-package org-roam
+  :straight t
+  :custom
+  (org-roam-directory (file-truename "/Notes/Roam"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+
+#+end_src
+
+* GUIX
+
+#+begin_src :tangle yes
+
+(add-to-list 'load-path "/home/malcolm/.guix-profile/share/emacs/site-lisp")
+
+(guix-emacs-autoload-packages)
+
+#+end_src
