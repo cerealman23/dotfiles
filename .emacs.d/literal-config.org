@@ -1,6 +1,6 @@
+#+STARTUP: content
 
-
-* Org babel defaults
+* TODO Org babel defaults
 
 * Ctrl and Esc
   Using the packages setxkbmap and xcape my CAPS lock key serves as a esc on tap and ctrl on key chord
@@ -104,6 +104,7 @@ Prot makes damn good themes
 #+end_src 
 
 * Window management
+
 ** EXWM
 
 #+begin_src emacs-lisp :tangle yes
@@ -187,14 +188,19 @@ evil mode
 =C-z= means go to emacs mode
 #+begin_src emacs-lisp :tangle yes
 
-	(use-package evil
-	  :straight t
-	  :config
-      (evil-mode 1)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-  )
+	    (use-package evil
+	      :straight t
+	      :config
+	  (evil-mode 1)
+	(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+      )
+
+      (use-package evil-collection
+	:straight t
+  :config (evil-collection-init))
+
 
 #+end_src
 
@@ -305,7 +311,7 @@ great minimal modeline it depends on all-the-icons
   (display-line-numbers-mode t)
   (setq display-line-numbers 'relative)
 
-#+end_src
+#+end_srcorg-mode
 * Vertico
 
 Lightweight complestion framework vert slim and fast
@@ -467,6 +473,22 @@ Modifier
   :hook (org-mode . org-bullets-mode)
   :custom (org-bullets-bullet-list '("♱" "⚉" "⚇" "⚉" "⚇" "⚉" "⚇")))
 #+end_src
+* Org-mode
+
+[[http://doc.norang.ca/org-mode.html][org-mode-guide]]
+
+#+begin_src emacs-lisp :tangle no
+    (use-package org
+      :hook (org-mode . visual-line-mode)
+      :bind (
+
+   ("C-c l" . #'org-store-link)
+   ( "C-c a" . #'org-agenda)
+   ( "C-c c" . #'org-capture)
+      ))
+
+#+end_src
+
 * Modeline
 
 Pretty sure it removes the arrows in thr modeline
@@ -499,7 +521,7 @@ Displays no battery right now
 
 Broken right now
 
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 (use-package symon
   :straight t
   :bind
@@ -618,9 +640,30 @@ Good for parenthesis
 #+end_src
 * Favorite themes
 
+#+begin_src emacs-lisp :tangle yes
+  (use-package flatui-theme
+    :straight t)
+
+  ; custom themes
+  (add-to-list 'custom-theme-load-path "/home/malcolm/.emacs.d/custom-themes")
+
+#+end_src
+
 ef-spring
 ef-summer
 ef-dark
+doom-peacock
+doom-shades-of-purple
+doom-laserwave
+* Autothemer
+
+#+begin_src emacs-lisp :tangle no
+  (use-package autothemer
+  :straight t)
+(add-to-list 'custom-theme-load-path "/home/malcolm/.dotfiles/.emacs.d")
+  
+#+end_src
+
 * Helpful
 
 #+begin_src emacs-lisp :tangle yes
@@ -659,36 +702,36 @@ ef-dark
 			  (lambda ()
 			  (setq-local evil-insert-state-cursor 'box)
 			  (evil-insert-state)))
-	  (define-key vterm-mode-map [return]                      #'vterm-send-return)
+	  (define-key vterm-mode-map [return]                      #'vterm-send-return))
 
-	  (setq vterm-keymap-exceptions nil)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
-	  (define-key vterm-mode-map (kbd "C-M-j") #'switch-to-buffer)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
-	  (evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
-	  (evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-	  (evil-define-key 'normal vterm-mode-map (kbd ",c")       #'multi-vterm)
-	  (evil-define-key 'normal vterm-mode-map (kbd ",n")       #'multi-vterm-next)
-	  (evil-define-key 'normal vterm-mode-map (kbd ",p")       #'multi-vterm-prev)
-	  (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
-	  (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
-          (evil-define-key 'normal vterm-mode-map (kbd "p")        #'vterm-yank)
-	  (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
+	  ;(setq vterm-keymap-exceptions nil)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
+	  ;(define-key vterm-mode-map (kbd "C-M-j") #'switch-to-buffer)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
+	  ;(evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd ",c")       #'multi-vterm)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd ",n")       #'multi-vterm-next)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd ",p")       #'multi-vterm-prev)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
+          ;(evil-define-key 'normal vterm-mode-map (kbd "p")        #'vterm-yank)
+	  ;(evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume))
 #+end_src
 * Fonts
 
@@ -700,12 +743,13 @@ This is font size
 * Desktop environment
 
 #+begin_src emacs-lisp :tangle yes
-    (use-package desktop-environment
-      :straight t
-      :after exwm
-      :config (desktop-environment-mode))
-  (setenv "GPG_AGENT_INFO" nil)
-(setq epa-pinentry-mode 'loopback)
+
+      (use-package desktop-environment
+	:straight t
+	:after exwm
+	:config (desktop-environment-mode)
+    (setenv "GPG_AGENT_INFO" nil)
+  (setq epa-pinentry-mode 'loopback))
 
 
 #+end_src
@@ -726,6 +770,17 @@ This is font size
       ("C-c p" . projectile-command-map)))
 
 #+end_src
+
+* DONE ORG Mode
+
+#+begin_src emacs-lisp :tangle yes
+
+    (setq org-todo-keywords
+        '((sequence "TODO" "WAITING" "INACTIVE" "|" "DONE")
+          (sequence "BUG(b)" "FEATURE(r)" "KNOW BUG(k)" "|" "FIXED(f)")))
+
+#+end_src
+
 
 * ORG roam
 
@@ -759,3 +814,38 @@ This is font size
 (guix-emacs-autoload-packages)
 
 #+end_src
+
+
+
+* LSP Mode
+
+#+begin_src emacs-lisp :tangle no
+      (use-package lsp-mode
+	:straight t
+	:init
+	;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+	(setq lsp-keymap-prefix "C-c l")
+	:hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+	       (ruby-mode . lsp)
+	       ;; if you want which-key integration
+	       (lsp-mode . lsp-enable-which-key-integration))
+	:commands lsp)
+
+      ;; optionally
+      (use-package lsp-ui :commands lsp-ui-mode)
+      ;; if you are helm user
+      ;; if you are ivy user
+
+      ;; optionally if you want to use debugger
+      (use-package dap-mode)
+      ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+      ;; optional if you want which-key integration
+      (use-package which-key
+	  :config
+	  (which-key-mode))
+
+      (use-package company
+      :straight t)
+#+end_src
+
