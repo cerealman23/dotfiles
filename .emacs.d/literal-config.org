@@ -108,77 +108,87 @@ Prot makes damn good themes
 ** EXWM
 
 #+begin_src emacs-lisp :tangle yes
-  (defun mk/exwm-update-class ()
-     (exwm-workspace-rename-buffer exwm-class-name))
+	(defun mk/exwm-update-class ()
+	   (exwm-workspace-rename-buffer exwm-class-name))
 
-   (use-package exwm
-     :straight t
-   :config
-      (setq exwm-workspace-number 5)
+	 (use-package exwm
+	   :straight t
+	 :config
+	    (setq exwm-workspace-number 5)
 
-   (require 'exwm-systemtray)
-   
-(exwm-systemtray-enable)
+	 (require 'exwm-systemtray)
+      (exwm-systemtray-enable)
 
-   ;; When window "class" updates, use it to set the buffer name
-   ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
-
-   ;; These keys should always pass through to Emacs
-   ;; Prefix keys get sent to emacs and not the given window
-   (setq exwm-input-prefix-keys
-     '(?\C-x
-       ?\C-u
-       ?\C-h
-       ?\M-x
-       ?\M-`
-       ?\M-&
-       ?\M-:
-       ?\C-\M-j  ;; Buffer list
-       ?\C-\ ))  ;; Ctrl+Space
-
-   ;; Ctrl+Q will enable the next key to be sent directly
-   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+    ;You will need to adjust the values of "DP-1" and "DP-2" to the values your computer uses; call xrandr at the command line with no arguments to see available outputs.
+      (require 'exwm-randr)
+      (exwm-randr-enable)
+      (start-process-shell-command "xrandr" nil "xrandr --output HDMI-2 --mode 3440x1440 --primary")
+      ;; (setq exwm-randr-workspace-output-plist '(1 "DP-1"))
+      ;; (add-hook 'exwm-randr-screen-change-hook
+      ;; 	    (lambda ()
+      ;; 	      (start-process-shell-command
+      ;; 	       "xrandr" nil "xrandr --output DP-1 --right-of DP-2 --auto")))
 
 
-   ;; this is a way to declare truly global/always working keybindings
-     ;; this is a nifty way to go back from char mode to line mode without using the mouse
-     (exwm-input-set-key (kbd "s-r") #'exwm-reset)
-     (exwm-input-set-key (kbd "s-k") #'exwm-workspace-delete)
-     (exwm-input-set-key (kbd "s-s") #'exwm-workspace-swap)
+	 ;; When window "class" updates, use it to set the buffer name
+	 ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
 
-   ;; Set up global key bindings.  These always work, no matter the input state!
-   ;; Keep in mind that changing this list after EXWM initializes has no effect.
-   (setq exwm-input-global-keys
-	 `(
-	   ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
-	   ([?\s-r] . exwm-reset)
+	 ;; These keys should always pass through to Emacs
+	 ;; Prefix keys get sent to emacs and not the given window
+	 (setq exwm-input-prefix-keys
+	   '(?\C-x
+	     ?\C-u
+	     ?\C-h
+	     ?\M-x
+	     ?\M-`
+	     ?\M-&
+	     ?\M-:
+	     ?\C-\M-j  ;; Buffer list
+	     ?\C-\ ))  ;; Ctrl+Space
 
-	   ;; Move between windows
-	   ([?\s-h] . windmove-left)
-	   ([?\s-l] . windmove-right)
-	   ([?\s-k] . windmove-up)
-	   ([?\s-j] . windmove-down)
-
-	   ;; Launch applications via shell command
-	   ([?\s-&] . (lambda (command)
-			(interactive (list (read-shell-command "$ ")))
-			(start-process-shell-command command nil command)))
-
-	   ;; Switch workspace
-	   ([?\s-w] . exwm-workspace-switch)
-           ([?\s-k] . exwm-input-release-keyboard)
-
-	   ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
-	   ,@(mapcar (lambda (i)
-		       `(,(kbd (format "s-%d" i)) .
-			 (lambda ()
-			   (interactive)
-			   (exwm-workspace-switch-create ,i))))
-		     (number-sequence 0 9))))
+	 ;; Ctrl+Q will enable the next key to be sent directly
+	 (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
 
+	 ;; this is a way to declare truly global/always working keybindings
+	   ;; this is a nifty way to go back from char mode to line mode without using the mouse
+	   (exwm-input-set-key (kbd "s-r") #'exwm-reset)
+	   (exwm-input-set-key (kbd "s-k") #'exwm-workspace-delete)
+	   (exwm-input-set-key (kbd "s-s") #'exwm-workspace-swap)
 
-      (exwm-enable t))
+	 ;; Set up global key bindings.  These always work, no matter the input state!
+	 ;; Keep in mind that changing this list after EXWM initializes has no effect.
+	 (setq exwm-input-global-keys
+	       `(
+		 ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+		 ([?\s-r] . exwm-reset)
+
+		 ;; Move between windows
+		 ([?\s-h] . windmove-left)
+		 ([?\s-l] . windmove-right)
+		 ([?\s-k] . windmove-up)
+		 ([?\s-j] . windmove-down)
+
+		 ;; Launch applications via shell command
+		 ([?\s-&] . (lambda (command)
+			      (interactive (list (read-shell-command "$ ")))
+			      (start-process-shell-command command nil command)))
+
+		 ;; Switch workspace
+		 ([?\s-w] . exwm-workspace-switch)
+		 ([?\s-k] . exwm-input-release-keyboard)
+
+		 ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+		 ,@(mapcar (lambda (i)
+			     `(,(kbd (format "s-%d" i)) .
+			       (lambda ()
+				 (interactive)
+				 (exwm-workspace-switch-create ,i))))
+			   (number-sequence 0 9))))
+
+
+
+	    (exwm-enable t))
 
 #+end_src
 
@@ -739,7 +749,7 @@ doom-gruvbox
 This is font size
 
 #+begin_src emacs-lisp :tangle yes
-(set-face-attribute 'default nil :height 140)
+(set-face-attribute 'default nil :family "Iosevka Extended" :height 150)
 #+end_src
 * Desktop environment
 
@@ -827,7 +837,7 @@ This is font size
 
 * GUIX
 
-#+begin_src :tangle yes
+#+begin_src emacs-lisp :tangle yes
 
 (add-to-list 'load-path "/home/malcolm/.guix-profile/share/emacs/site-lisp")
 
@@ -871,4 +881,22 @@ This is font size
 
 #+end_src
 
+* Java
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package lsp-java
+    :straight t
+    :config
+  (add-hook 'java-mode-hook #'lsp))
+
+
+
+#+end_src
+
+* PDF tools
+
+#+begin_src emacs-lisp :tangle yes
+  (use-package pdf-tools
+    :straight t)
+#+end_src
 

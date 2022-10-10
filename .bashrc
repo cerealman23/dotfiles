@@ -36,3 +36,8 @@ alias slack='flatpak run com.slack.Slack'
 # Swaps ctrl with caps lock and makes a single press act as escape
 
 eval "$(starship init bash)"
+
+GUIX_PROFILE="/home/malcolm/.guix-profile"
+. "$GUIX_PROFILE/etc/profile"
+
+GUIX_PROFILE="/home/malcolm/.config/guix/current"
