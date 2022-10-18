@@ -41,3 +41,5 @@ GUIX_PROFILE="/home/malcolm/.guix-profile"
 . "$GUIX_PROFILE/etc/profile"
 
 GUIX_PROFILE="/home/malcolm/.config/guix/current"
+
+export EDITOR=vim

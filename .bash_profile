@@ -6,6 +6,7 @@ GUIX_PROFILE="/home/malcolm/.guix-profile"
 
 GUIX_PROFILE="/home/malcolm/.config/guix/current"
 
+## before the plan eyboard
 setxkbmap -option ctrl:nocaps
 xcape -e 'Control_L=Escape' -t 175
 
@@ -17,3 +18,7 @@ export GEM_SPEC_CACHE=/home/malcolm/.gem/ziy7a6zib846426kprc7fgimggh8bz97-ruby-2
 mkdir -p $GEM_PATH
 mkdir -p $GEM_SPEC_CACHE
 gem env
+
+NPM_PACKAGES="${HOME}/.npm-packages"
+export PATH="$PATH:$NPM_PACKAGES/bin"
+export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"

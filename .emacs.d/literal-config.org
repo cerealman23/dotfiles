@@ -1,4 +1,4 @@
-#+STARTUP: content
+jjjjj#+STARTUP: content
 
 * TODO Org babel defaults
 
@@ -70,17 +70,18 @@ Not in use right now
 * Doom
 
 #+begin_src emacs-lisp :tangle yes
-(use-package doom-themes
-  :straight t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (use-package doom-themes
+    :straight t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+	  doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config)
+  :init (load-theme 'doom-palenight t nil))
 #+end_src 
 * gruber
 
@@ -98,8 +99,8 @@ Prot makes damn good themes
 #+begin_src emacs-lisp :tangle yes
 
   (use-package ef-themes
-    :straight t
-    :init (load-theme 'ef-dark t nil))
+    :straight t)
+    ;; :init (load-theme 'ef-dark t nil))
 
 #+end_src 
 
@@ -357,15 +358,19 @@ Adds the metadata you see at the side of the completions
 #+end_src
 * Magit
 
-
-
 #+begin_src emacs-lisp :tangle yes
-(use-package magit
-  :straight t
-  ; replace current window with magit
-  :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-  :bind (("C-x g" . magit)))
+
+  (use-package magit
+    :straight t
+    ; replace current window with magit
+    :custom (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+    :bind (("C-x g" . magit)))
+
+  (use-package magit-todos
+    :straight t)
+
 #+end_src
+** TODO Magit mode hook
 
 * Change yes and no to y and n
 
@@ -769,26 +774,31 @@ This is font size
 
 #+begin_src emacs-lisp :tangle yes
 
-  (use-package projectile
+    (use-package projectile
+      :straight t
+      :init
+      (projectile-mode 1)
+      :config
+
+      (projectile-register-project-type 'ruby-raw '("Gemfile" "main.rb")
+				      :project-file "Gemfile"
+				      :compile "bundle exec rake"
+				      :src-dir "./"
+				      :test "bundle exec rspec"
+				      :test-dir "spec/"
+				      :run "ruby main.rb"
+				      :test-suffix "_spec")
+
+      (setq projectile-project-search-path '(("~/Development/" . 3) "~/clones/" ))
+      :bind (:map projectile-mode-map
+      ; I don't know what keu vinfing I like I want to test out what key bindings feel best
+	("s-p" . projectile-command-map)
+	("C-c p" . projectile-command-map)))
+  (use-package projectile-ripgrep
     :straight t
-    :init
-    (projectile-mode 1)
+    :after projectile
     :config
-
-    (projectile-register-project-type 'ruby-raw '("Gemfile" "main.rb")
-				    :project-file "Gemfile"
-				    :compile "bundle exec rake"
-				    :src-dir "./"
-				    :test "bundle exec rspec"
-				    :test-dir "spec/"
-				    :run "ruby main.rb"
-				    :test-suffix "_spec")
-
-    (setq projectile-project-search-path '(("~/Development/" . 3) "~/clones/" ))
-    :bind (:map projectile-mode-map
-    ; I don't know what keu vinfing I like I want to test out what key bindings feel best
-      ("s-p" . projectile-command-map)
-      ("C-c p" . projectile-command-map)))
+    (evil-collection-ripgrep-setup))
 
 #+end_src
 
@@ -900,3 +910,42 @@ This is font size
     :straight t)
 #+end_src
 
+
+
+* epub viewer
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package nov
+     :straight t)
+
+#+end_src
+
+* Audio
+#+begin_src emacs-lisp :tangle yes
+
+  (use-package pulseaudio-control
+    :straight t
+    :bind (("<XF86AudioRaiseVolume>" . pulseaudio-control-increase-volume)
+	   ("<XF86AudioLowerVolume>" . pulseaudio-control-decrease-volume)
+	   ("<XF86AudioMute>" . pulseaudio-control-toggle-current-sink-mute)
+	   ("C-c v" . hydra-pulseaudio-control/body)
+	   :map exwm-mode-map
+	   ("<XF86AudioRaiseVolume>" . pulseaudio-control-increase-volume)
+	   ("<XF86AudioLowerVolume>" . pulseaudio-control-decrease-volume)
+	   ("<XF86AudioMute>" . pulseaudio-control-toggle-current-sink-mute))
+    ;;:bind-keymap ("C-c v" . pulseaudio-control-map)
+    :config
+    ;; XXX: Maybe -set-volume (1-9 keys sets 10%, 20% etc)?
+    ;;      Maybe show selected sink and volume
+    (defhydra hydra-pulseaudio-control (:hint nil)
+      "Pulseaudio Control"
+      ("+" pulseaudio-control-increase-volume "Increase Volume")
+      ("i" pulseaudio-control-increase-volume "Increase Volume")
+      ("-" pulseaudio-control-decrease-volume "Decrease Volume")
+      ("d" pulseaudio-control-decrease-volume "Decrease Volume")
+      ("m" pulseaudio-control-toggle-current-sink-mute "Toggle Mute")
+      ("s" pulseaudio-control-select-sink-by-name "Select Sink")
+      ("q" nil "quit"))
+    (setq pulseaudio-control-volume-step "5%"))
+
+#+end_src
