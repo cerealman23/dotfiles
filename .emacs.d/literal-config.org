@@ -1,4 +1,4 @@
-jjjjj#+STARTUP: content
+#+STARTUP: content
 
 * TODO Org babel defaults
 
@@ -199,18 +199,23 @@ evil mode
 =C-z= means go to emacs mode
 #+begin_src emacs-lisp :tangle yes
 
-	    (use-package evil
-	      :straight t
-	      :config
-	  (evil-mode 1)
-	(define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-      )
+	       (use-package evil
+		 :straight t
+		 :config
+	     (evil-mode 1)
+	   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+	 (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+	 (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+	 )
 
-      (use-package evil-collection
-	:straight t
-  :config (evil-collection-init))
+	 (use-package evil-collection
+	   :straight t
+     :config (evil-collection-init))
+
+    (use-package evil-easymotion
+      :straight t
+  :config
+(evilem-default-keybindings "SPC"))
 
 
 #+end_src
@@ -641,8 +646,8 @@ Good for parenthesis
 
 
 #+begin_src emacs-lisp :tangle yes
-  (set-frame-parameter (selected-frame) 'alpha '(85 . 50))
-   (add-to-list 'default-frame-alist '(alpha . (85 . 50)))
+  (set-frame-parameter (selected-frame) 'alpha '(85 . 70))
+   (add-to-list 'default-frame-alist '(alpha . (85 . 70)))
    (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
    (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
@@ -651,7 +656,7 @@ Good for parenthesis
      (interactive)
      (async-shell-command "compton")
      (start-process-shell-command
-     "feh" nil "feh --bg-scale /home/malcolm/Downloads/Backgrounds/Tintin/tinton.jpg"))
+     "feh" nil "feh --bg-scale /home/malcolm/Downloads/Backgrounds/kirby-yarn.jpg"))
 #+end_src
 * Favorite themes
 
