@@ -199,23 +199,36 @@ evil mode
 =C-z= means go to emacs mode
 #+begin_src emacs-lisp :tangle yes
 
-	       (use-package evil
-		 :straight t
-		 :config
-	     (evil-mode 1)
-	   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
-	 (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-	 (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-	 )
+			   (use-package evil
+			     :straight t
+			     :config
+			 (evil-mode 1)
+		       (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+		     (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+		     (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+		     )
 
-	 (use-package evil-collection
-	   :straight t
-     :config (evil-collection-init))
+		     (use-package evil-collection
+		       :straight t
+		 :config (evil-collection-init))
 
-    (use-package evil-easymotion
-      :straight t
-  :config
-(evilem-default-keybindings "SPC"))
+		(use-package evil-easymotion
+		  :straight t
+	      :config
+	    (evilem-default-keybindings "SPC"))
+
+	    (use-package evil-snipe
+	      :straight t
+	  :config
+	(evil-snipe-mode +1)
+	(evil-snipe-override-mode 1)
+      ;; causes errors in magit-mode
+      (add-hook 'magit-mode-hook 'turn-off-evil-snipe-override-mode))
+
+      (use-package evil-commentary
+	:straight t
+	:config
+  (evil-commentary-mode))
 
 
 #+end_src
@@ -225,23 +238,27 @@ evil mode
 ** General.el keys
 #+begin_src emacs-lisp :tangle yes
 
-(use-package general
-  :config
-  (general-evil-setup t)
+    (use-package general
+      :config
+      (general-evil-setup t)
 
-  (general-create-definer mk/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC"))
+      (general-create-definer mk/leader-keys
+	:keymaps '(normal insert visual emacs)
+	:prefix "SPC"
+	:global-prefix "C-SPC"))
+  (general-unbind '(insert normal visual emacs)
+    "SPC" 
+    "C-SPC"
+    )
+    (mk/leader-keys
+      "v"  '(:ignore t :which-key "vterm in current dirctory")
+      "t"  '(:ignore t :which-key "toggles")
+      "tt" '(load-theme :which-key "choose theme"))
 
-(mk/leader-keys
-  "t"  '(:ignore t :which-key "toggles")
-  "tt" '(load-theme :which-key "choose theme"))
+	(general-define-key "C-M-j" 'switch-to-buffer)
 
-    (general-define-key "C-M-j" 'switch-to-buffer)
-
-    ;; could get annoying with vim escape
-    (global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
+	;; could get annoying with vim escape
+	(global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
 
 #+end_src
 * Which key
@@ -259,37 +276,45 @@ evil mode
 
 For quick repetitive actions
 
-#+begin_src emacs-lisp :tangle yes
-       (use-package hydra
-       :straight t)
+#+begin_src emacs-lisp :tangle yes 
+	 (use-package hydra
+	 :straight t)
 
-   (defhydra hydra-text-scale (:timeout 4)
-     "scale text"
-     ("j" text-scale-increase "in")
-     ("k" text-scale-decrease "out")
-     ("f" nil "finished" :exit t))
+     (defhydra hydra-text-scale (:timeout 4)
+       "scale text"
+       ("j" text-scale-increase "in")
+       ("k" text-scale-decrease "out")
+       ("f" nil "finished" :exit t))
 
 
-   (defhydra hydra-shape-screen (:timeout 4)
-     "scale text"
-     ("h" enlarge-window-horizontally "in")
-     ("l" shrink-window-horizontally "out")
-     ("k" enlarge-window "up")
-     ("j" (enlarge-window -1) "down")
-     ("=" balance-windows "equalize")
-     ("f" nil "finished" :exit t))
+     (defhydra hydra-shape-screen (:timeout 4)
+       "scale text"
+       ("h" enlarge-window-horizontally "in")
+       ("l" shrink-window-horizontally "out")
+       ("k" enlarge-window "up")
+       ("j" (enlarge-window -1) "down")
+       ("=" balance-windows "equalize")
+       ("f" nil "finished" :exit t))
 
-  ;; enlarge-window-horizontally 
+    ;; enlarge-window-horizontally 
 
-   (mk/leader-keys
-   "ts" '(hydra-text-scale/body :which-key "scale-text")
-   "t}" '(hydra-shape-screen/body :which-key "size-screen"))
+     (mk/leader-keys
+     "ts" '(hydra-text-scale/body :which-key "scale-text")
+     "t}" '(hydra-shape-screen/body :which-key "size-screen"))
 
+    (mk/leader-keys
+      "vv" '(vterm-toggle :which-key "vterm popper")
+      "vc" '(vterm-toggle-cd :which-key "vterm popper")
+      "vj" '(vterm-toggle-forward :which-key "vterm popper")
+      "vk" '(vterm-toggle-backwards :which-key "vterm popper"))
 #+end_src
 * Terminals
 
 #+begin_src emacs-lisp :tangle yes
-(use-package vterm
+   (use-package vterm
+       :straight t)
+
+  (use-package vterm-toggle
     :straight t)
 #+end_src
 * Doom modeline
@@ -327,7 +352,7 @@ great minimal modeline it depends on all-the-icons
   (display-line-numbers-mode t)
   (setq display-line-numbers 'relative)
 
-#+end_srcorg-mode
+#+end_src
 * Vertico
 
 Lightweight complestion framework vert slim and fast
@@ -577,9 +602,9 @@ Need to change some keybindigs for ibuffer
 #+end_src
 * TODO Line number mode
 
-add more hooks for relative lines
+add more hooks for relative lines, I started moving away from linenumbers and using evile easy motions.  I get more screen realestate and line numbers in emacs are wack on performace.
 
-#+begin_src emacs-lisp :tangle yes 
+#+begin_src emacs-lisp :tangle no
 (use-package linum-relative
   :straight t
   :config
@@ -954,3 +979,24 @@ This is font size
     (setq pulseaudio-control-volume-step "5%"))
 
 #+end_src
+
+* Tramp
+
+#+begin_src emacs-lisp :tangle no
+
+  (defun vterm-ssh (host)
+    (vterm)
+    (vterm-send-string (concat "ssh " host "\n")))
+
+  (defun vterm-ssh-office ()
+      (interactive)
+      (vterm-ssh "sysadmin@csc415-team12.hpc.tcnj.edu"))
+
+  (defun ssh()
+    (interactive)
+    (let ((default-directory "/ssh:sysadmin@csc415-team12.hpc.tcnj.edu:~"))
+      (vterm-toggle)))
+
+
+#+end_src
+
