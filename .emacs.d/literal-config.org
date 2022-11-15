@@ -109,90 +109,114 @@ Prot makes damn good themes
 ** EXWM
 
 #+begin_src emacs-lisp :tangle yes
-	(defun mk/exwm-update-class ()
-	   (exwm-workspace-rename-buffer exwm-class-name))
+	  (defun mk/exwm-update-class ()
+	     (exwm-workspace-rename-buffer exwm-class-name))
 
-	 (use-package exwm
-	   :straight t
-	 :config
-	    (setq exwm-workspace-number 5)
+	   (use-package exwm
+	     :straight t
+	   :config
+	      (setq exwm-workspace-number 5)
 
-	 (require 'exwm-systemtray)
-      (exwm-systemtray-enable)
+	   (require 'exwm-systemtray)
+	(exwm-systemtray-enable)
 
-    ;You will need to adjust the values of "DP-1" and "DP-2" to the values your computer uses; call xrandr at the command line with no arguments to see available outputs.
-      (require 'exwm-randr)
-      (exwm-randr-enable)
-      (start-process-shell-command "xrandr" nil "xrandr --output HDMI-2 --mode 3440x1440 --primary")
-      ;; (setq exwm-randr-workspace-output-plist '(1 "DP-1"))
-      ;; (add-hook 'exwm-randr-screen-change-hook
-      ;; 	    (lambda ()
-      ;; 	      (start-process-shell-command
-      ;; 	       "xrandr" nil "xrandr --output DP-1 --right-of DP-2 --auto")))
-
-
-	 ;; When window "class" updates, use it to set the buffer name
-	 ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
-
-	 ;; These keys should always pass through to Emacs
-	 ;; Prefix keys get sent to emacs and not the given window
-	 (setq exwm-input-prefix-keys
-	   '(?\C-x
-	     ?\C-u
-	     ?\C-h
-	     ?\M-x
-	     ?\M-`
-	     ?\M-&
-	     ?\M-:
-	     ?\C-\M-j  ;; Buffer list
-	     ?\C-\ ))  ;; Ctrl+Space
-
-	 ;; Ctrl+Q will enable the next key to be sent directly
-	 (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+      ;You will need to adjust the values of "DP-1" and "DP-2" to the values your computer uses; call xrandr at the command line with no arguments to see available outputs.
+	(require 'exwm-randr)
+	(exwm-randr-enable)
+	(start-process-shell-command "xrandr" nil "xrandr --output HDMI-2 --mode 3440x1440 --primary")
+	;; (setq exwm-randr-workspace-output-plist '(1 "DP-1"))
+	;; (add-hook 'exwm-randr-screen-change-hook
+	;; 	    (lambda ()
+	;; 	      (start-process-shell-command
+	;; 	       "xrandr" nil "xrandr --output DP-1 --right-of DP-2 --auto")))
 
 
-	 ;; this is a way to declare truly global/always working keybindings
-	   ;; this is a nifty way to go back from char mode to line mode without using the mouse
-	   (exwm-input-set-key (kbd "s-r") #'exwm-reset)
-	   (exwm-input-set-key (kbd "s-k") #'exwm-workspace-delete)
-	   (exwm-input-set-key (kbd "s-s") #'exwm-workspace-swap)
+	   ;; When window "class" updates, use it to set the buffer name
+	   ;; (add-hook 'exwm-update-class-hook #'efs/exwm-update-class)
 
-	 ;; Set up global key bindings.  These always work, no matter the input state!
-	 ;; Keep in mind that changing this list after EXWM initializes has no effect.
-	 (setq exwm-input-global-keys
-	       `(
-		 ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
-		 ([?\s-r] . exwm-reset)
+	   ;; These keys should always pass through to Emacs
+	   ;; Prefix keys get sent to emacs and not the given window
+	   (setq exwm-input-prefix-keys
+	     '(?\
+               ?\C-x
+	       ?\C-u
+	       ?\C-h
+	       ?\M-x
+	       ?\M-`
+	       ?\M-&
+	       ?\M-:
+	       ?\C-\M-j  ;; Buffer list
+	       ?\C-\ ))  ;; Ctrl+Space
 
-		 ;; Move between windows
-		 ([?\s-h] . windmove-left)
-		 ([?\s-l] . windmove-right)
-		 ([?\s-k] . windmove-up)
-		 ([?\s-j] . windmove-down)
+	   ;; Ctrl+Q will enable the next key to be sent directly
+	   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
-		 ;; Launch applications via shell command
-		 ([?\s-&] . (lambda (command)
-			      (interactive (list (read-shell-command "$ ")))
-			      (start-process-shell-command command nil command)))
+	   ;; this is a way to declare truly global/always working keybindings
+	     ;; this is a nifty way to go back from char mode to line mode without using the mouse
+	     (exwm-input-set-key (kbd "s-r") #'exwm-reset)
+	     (exwm-input-set-key (kbd "s-k") #'exwm-workspace-delete)
+	     (exwm-input-set-key (kbd "s-s") #'exwm-workspace-swap)
 
-		 ;; Switch workspace
-		 ([?\s-w] . exwm-workspace-switch)
-		 ([?\s-k] . exwm-input-release-keyboard)
+	   ;; Set up global key bindings.  These always work, no matter the input state!
+	   ;; Keep in mind that changing this list after EXWM initializes has no effect.
+	   (setq exwm-input-global-keys
+		 `(
+		   ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+		   ([?\s-r] . exwm-reset)
 
-		 ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
-		 ,@(mapcar (lambda (i)
-			     `(,(kbd (format "s-%d" i)) .
-			       (lambda ()
-				 (interactive)
-				 (exwm-workspace-switch-create ,i))))
-			   (number-sequence 0 9))))
+		   ;; Move between windows
+		   ([?\s-h] . windmove-left)
+		   ([?\s-l] . windmove-right)
+		   ([?\s-k] . windmove-up)
+		   ([?\s-j] . windmove-down)
+
+		   ;; Launch applications via shell command
+		   ([?\s-&] . (lambda (command)
+				(interactive (list (read-shell-command "$ ")))
+				(start-process-shell-command command nil command)))
+
+		   ;; Switch workspace
+		   ([?\s-w] . exwm-workspace-switch)
+		   ([?\s-k] . exwm-input-release-keyboard)
+
+		   ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+		   ,@(mapcar (lambda (i)
+			       `(,(kbd (format "s-%d" i)) .
+				 (lambda ()
+				   (interactive)
+				   (exwm-workspace-switch-create ,i))))
+			     (number-sequence 0 9))))
 
 
 
-	    (exwm-enable t))
+	      (exwm-enable t))
 
 #+end_src
 
+* Which key
+
+#+begin_src emacs-lisp :tangle yes
+(use-package which-key
+  :straight t
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+#+end_src
+
+* Terminals
+
+#+begin_src emacs-lisp :tangle yes
+	 (use-package vterm
+	     :straight t
+      :config
+      (setq vterm-tramp-shells '(("ssh" "/bin/bash")
+			       )))
+
+	(use-package vterm-toggle
+	  :straight t
+  :config (setq vterm-toggle-reset-window-configration-after-exit t))
+#+end_src
 * Evil mode and general keybindig soulutions
 evil mode
 
@@ -214,8 +238,8 @@ evil mode
 
 		(use-package evil-easymotion
 		  :straight t
-	      :config
-	    (evilem-default-keybindings "SPC"))
+		  :config
+	    (evilem-default-keybindings "gs"))
 
 	    (use-package evil-snipe
 	      :straight t
@@ -234,88 +258,108 @@ evil mode
 #+end_src
 
 
-
 ** General.el keys
 #+begin_src emacs-lisp :tangle yes
 
-    (use-package general
-      :config
-      (general-evil-setup t)
+  (use-package general
+    :config
+    (general-evil-setup t)
 
-      (general-create-definer mk/leader-keys
-	:keymaps '(normal insert visual emacs)
-	:prefix "SPC"
-	:global-prefix "C-SPC"))
-  (general-unbind '(insert normal visual emacs)
-    "SPC" 
-    "C-SPC"
-    )
-    (mk/leader-keys
-      "v"  '(:ignore t :which-key "vterm in current dirctory")
-      "t"  '(:ignore t :which-key "toggles")
-      "tt" '(load-theme :which-key "choose theme"))
+    (general-create-definer mk/leader-keys
+      :keymaps '(normal visual emacs)
+  :prefix "SPC"
+      :global-prefix "C-SPC"))
 
-	(general-define-key "C-M-j" 'switch-to-buffer)
+  ;;  (general-unbind '(insert normal visual emacs)
+  ;; "SPC" 
+  ;; "C-SPC"
+ ;; )
+  (mk/leader-keys
+    "v"  '(:ignore t :which-key "vterm in current dirctory")
+    "t"  '(:ignore t :which-key "toggles")
+    "tt" '(load-theme :which-key "choose theme"))
 
-	;; could get annoying with vim escape
-	(global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
+    (general-define-key "C-M-j" 'switch-to-buffer)
+
+
+      ;; could get annoying with vim escape
+      (global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
+      (global-set-key (kbd "<escape>" ) 'keyboard-escape-quit)
 
 #+end_src
-* Which key
+
+** space bindings
 
 #+begin_src emacs-lisp :tangle yes
-(use-package which-key
-  :straight t
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-#+end_src
 
+
+    ;; to do make f P for private config
+  (defun delete-cur-file ()
+    (interactive)
+    (delete-file (buffer-file-name)
+  ))
+
+
+    ;; This is for file management
+    (mk/leader-keys
+      "f" '(:ignore t :which-key "file management" )
+      "ff" '(find-file :which-key "find file")
+      "fD" '(delete-cur-file :which-key "delete file")
+      "fs" '(save-buffer :which-key "save file")
+      "fi" '(insert-file :which-key "inser file into buffer")
+      "fR" '(rename-file :which-key "rename file"))
+
+    (mk/leader-keys
+      "w" '(:ignore t :which-key "window management" )
+      "wv" '(split-window-right :which-key "split vertically" )
+      "wh" '(split-window-below :which-key "split horizontally" )
+      "w0" '(delete-window :which-key "kill window")
+      "ww" '(other-window :which-key "kill window")
+      "w1" '(delete-other-windows :which-key "kill window"))
+
+    ;; THis is for buffer management
+    (mk/leader-keys
+      "b" '(:ignore t :which-key "window management" )
+      "bb" '(switch-to-buffer :which-key "switch buffers" )
+      "bn" '(other-window :which-key "next buffer"))
+
+#+end_src
 * Hydra
 
 For quick repetitive actions
 
 #+begin_src emacs-lisp :tangle yes 
-	 (use-package hydra
-	 :straight t)
-
-     (defhydra hydra-text-scale (:timeout 4)
-       "scale text"
-       ("j" text-scale-increase "in")
-       ("k" text-scale-decrease "out")
-       ("f" nil "finished" :exit t))
-
-
-     (defhydra hydra-shape-screen (:timeout 4)
-       "scale text"
-       ("h" enlarge-window-horizontally "in")
-       ("l" shrink-window-horizontally "out")
-       ("k" enlarge-window "up")
-       ("j" (enlarge-window -1) "down")
-       ("=" balance-windows "equalize")
-       ("f" nil "finished" :exit t))
-
-    ;; enlarge-window-horizontally 
-
-     (mk/leader-keys
-     "ts" '(hydra-text-scale/body :which-key "scale-text")
-     "t}" '(hydra-shape-screen/body :which-key "size-screen"))
-
-    (mk/leader-keys
-      "vv" '(vterm-toggle :which-key "vterm popper")
-      "vc" '(vterm-toggle-cd :which-key "vterm popper")
-      "vj" '(vterm-toggle-forward :which-key "vterm popper")
-      "vk" '(vterm-toggle-backwards :which-key "vterm popper"))
-#+end_src
-* Terminals
-
-#+begin_src emacs-lisp :tangle yes
-   (use-package vterm
+       (use-package hydra
        :straight t)
 
-  (use-package vterm-toggle
-    :straight t)
+   (defhydra hydra-text-scale (:timeout 4)
+     "scale text"
+     ("j" text-scale-increase "in")
+     ("k" text-scale-decrease "out")
+     ("f" nil "finished" :exit t))
+
+
+   (defhydra hydra-shape-screen (:timeout 4)
+     "scale text"
+     ("h" enlarge-window-horizontally "in")
+     ("l" shrink-window-horizontally "out")
+     ("k" enlarge-window "up")
+     ("j" (enlarge-window -1) "down")
+     ("=" balance-windows "equalize")
+     ("f" nil "finished" :exit t))
+
+  ;; enlarge-window-horizontally 
+
+   (mk/leader-keys
+   "ts" '(hydra-text-scale/body :which-key "scale-text")
+   "t}" '(hydra-shape-screen/body :which-key "size-screen"))
+
+  ;; todo add modifiers so like sftp or ssh
+  (mk/leader-keys
+    "vv" '(vterm-toggle :which-key "vterm popper")
+    "vt" '(mk/ssh-team :which-key "terminal for team vm")
+    "vi" '(mk/ssh-individual :which-key "terminal for indiviudal vm")
+    "vn" '(multi-vterm :which-key "create a new vterm"))
 #+end_src
 * Doom modeline
 
@@ -408,15 +452,10 @@ Adds the metadata you see at the side of the completions
 #+begin_src emacs-lisp :tangle yes
 (defalias 'yes-or-no-p 'y-or-n-p)
 #+end_src
-* Dmenu
-
-Pops up a list of all executable programs installe on my system
-
+* Dmenu Pops up a list of all executable programs installe on my system
 #+begin_src emacs-lisp :tangle yes
-(use-package dmenu
-  :ensure t
-  :bind
-    ("s-SPC" . 'dmenu))
+  (use-package dmenu :ensure t :bind ("s-SPC" . 'dmenu))
+
 #+end_src
 * Key bindings for programs
 
@@ -666,6 +705,12 @@ Good for parenthesis
   (require 'org-tempo)
 
   (add-to-list 'org-structure-template-alist '("n" . "name" ))
+
+     (with-eval-after-load 'org
+       (org-babel-do-load-languages
+           'org-babel-load-languages
+           '((emacs-lisp . t)
+           (python . t) (C . t)  (shell . t) (scheme . t))))
 #+end_src
 * Transparency
 
@@ -879,9 +924,11 @@ This is font size
 
 #+begin_src emacs-lisp :tangle yes
 
-(add-to-list 'load-path "/home/malcolm/.guix-profile/share/emacs/site-lisp")
+  (add-to-list 'load-path "/home/malcolm/.guix-profile/share/emacs/site-lisp/")
 
-(guix-emacs-autoload-packages)
+  (guix-emacs-autoload-packages)
+
+  (require 'guix-autoloads nil t)
 
 #+end_src
 
@@ -982,21 +1029,38 @@ This is font size
 
 * Tramp
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
 
-  (defun vterm-ssh (host)
-    (vterm)
-    (vterm-send-string (concat "ssh " host "\n")))
+    (defun vterm-ssh (host)
+      (vterm)
+      (vterm-send-string (concat "ssh " host "\n")))
 
-  (defun vterm-ssh-office ()
+    (defun vterm-ssh-office ()
+	(interactive)
+	(vterm-ssh "sysadmin@csc415-team12.hpc.tcnj.edu"))
+
+    (defun mk/ssh-team()
       (interactive)
-      (vterm-ssh "sysadmin@csc415-team12.hpc.tcnj.edu"))
+      (let ((default-directory "/ssh:sysadmin@csc415-team12.hpc.tcnj.edu:"))
+	(vterm-toggle)))
 
-  (defun ssh()
-    (interactive)
-    (let ((default-directory "/ssh:sysadmin@csc415-team12.hpc.tcnj.edu:~"))
-      (vterm-toggle)))
+    (defun mk/ssh-individual()
+      (interactive)
+      (let ((default-directory "/ssh:student1@csc415-server05.hpc.tcnj.edu:"))
+	(vterm-toggle)))
+
+  (define-key vterm-mode-map [(control tab)]   #'vterm-toggle-insert-cd)
 
 
 #+end_src
 
+* Lisp
+
+Mandaroy
+
+#+begin_src emacs-lisp :tangle yes
+
+    (use-package paredit
+      :straight t)
+  
+#+end_src
