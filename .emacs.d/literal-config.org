@@ -80,16 +80,16 @@ Not in use right now
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
     ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config)
-  :init (load-theme 'doom-palenight t nil))
+    (doom-themes-org-config))
+  ;; :init (load-theme 'doom-palenight t nil))
 #+end_src 
 * gruber
 
 #+begin_src emacs-lisp :tangle yes
 
   (use-package gruber-darker-theme
-    :straight t)
-    ;:init (load-theme 'gruber-darker t t)
+    :straight t
+    :init (load-theme 'gruber-darker t t))
 
 #+end_src 
 * Prot themes
@@ -207,15 +207,16 @@ Prot makes damn good themes
 * Terminals
 
 #+begin_src emacs-lisp :tangle yes
-	 (use-package vterm
-	     :straight t
-      :config
-      (setq vterm-tramp-shells '(("ssh" "/bin/bash")
-			       )))
+   (use-package vterm
+       :straight t
+       :config
+       (setq vterm-tramp-shells '(("ssh" "/bin/bash")
+   )))
 
-	(use-package vterm-toggle
-	  :straight t
-  :config (setq vterm-toggle-reset-window-configration-after-exit t))
+  (use-package vterm-toggle
+    :straight t
+    :config (setq vterm-toggle-reset-window-configration-after-exit t))
+
 #+end_src
 * Evil mode and general keybindig soulutions
 evil mode
@@ -277,6 +278,7 @@ evil mode
   (mk/leader-keys
     "v"  '(:ignore t :which-key "vterm in current dirctory")
     "t"  '(:ignore t :which-key "toggles")
+    "."  '(find-file  :which-key "find file")
     "tt" '(load-theme :which-key "choose theme"))
 
     (general-define-key "C-M-j" 'switch-to-buffer)
@@ -959,17 +961,35 @@ This is font size
   ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 
   ;; optional if you want which-key integration
-  (use-package which-key
-      :config
-      (which-key-mode))
+  ;; (use-package which-key
+  ;;     :config
+  ;;     (which-key-mode))
+
+
+#+end_src
+
+#+RESULTS:
+
+* Company
+
+#+begin_src emacs-lisp :tangle yes
 
   (use-package company
   :straight t)
 
 #+end_src
 
+* Eglot
+
+#+begin_src emacs-lisp :tangle no
+
+  (use-package eglot
+   :straight t)
+
+#+end_src
+
 * Java
-#+begin_src emacs-lisp :tangle yes
+#+begin_src emacs-lisp :tangle no
 
   (use-package lsp-java
     :straight t
@@ -1029,6 +1049,8 @@ This is font size
 
 * Tramp
 
+** Vterm toggle with multi-vterm
+
 #+begin_src emacs-lisp :tangle yes
 
     (defun vterm-ssh (host)
@@ -1042,7 +1064,7 @@ This is font size
     (defun mk/ssh-team()
       (interactive)
       (let ((default-directory "/ssh:sysadmin@csc415-team12.hpc.tcnj.edu:"))
-	(vterm-toggle)))
+	(multi-vterm)))
 
     (defun mk/ssh-individual()
       (interactive)
