@@ -338,11 +338,12 @@ For quick repetitive actions
      "scale text"
      ("j" text-scale-increase "in")
      ("k" text-scale-decrease "out")
+     ("0" text-scale-set "0")
      ("f" nil "finished" :exit t))
 
 
    (defhydra hydra-shape-screen (:timeout 4)
-     "scale text"
+     "adjust window"
      ("h" enlarge-window-horizontally "in")
      ("l" shrink-window-horizontally "out")
      ("k" enlarge-window "up")
@@ -354,7 +355,7 @@ For quick repetitive actions
 
    (mk/leader-keys
    "ts" '(hydra-text-scale/body :which-key "scale-text")
-   "t}" '(hydra-shape-screen/body :which-key "size-screen"))
+   "tw" '(hydra-shape-screen/body :which-key "size-screen"))
 
   ;; todo add modifiers so like sftp or ssh
   (mk/leader-keys
